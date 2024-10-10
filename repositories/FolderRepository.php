@@ -17,8 +17,8 @@ class FolderRepository {
     }
 
     public function findById(int $id): ?FolderDTO {
-        $folderData = $this->folderDAO->findById($id);
-        return $folderData ? FolderDTO::fromArray($folderData) : null;
+        $folder = $this->folderDAO->findById($id);
+        return $folder ? FolderDTO::fromArray($folder) : null;
     }
 
     public function create(FolderDTO $folderDTO): bool {
