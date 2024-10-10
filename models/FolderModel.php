@@ -42,32 +42,20 @@ class FolderModel {
 
     public function validate(): array {
         $errors = [];
-
         if (strlen($this->title) > 75) {
             $errors[] = "Le titre ne doit pas dépasser 75 caractères.";
         }
-
         if (strlen($this->description) > 500) {
             $errors[] = "La description ne doit pas dépasser 500 caractères.";
         }
-
         if (strlen($this->text) > 2000) {
             $errors[] = "Le contenu ne doit pas dépasser 2000 caractères.";
         }
-
-        if (!preg_match('/^[a-z0-9]+(?:-[a-z0-9]+)*$/', $this->slug)) {
-            $errors[] = "Le slug doit être en format valide (lettres minuscules, chiffres et tirets uniquement).";
-        }
-
         return $errors;
     }
 
     public function isValid(): bool {
         return count($this->validate()) === 0;
-    }
-
-    public function generateSlug(): void {
-        $this->slug = strtolower(trim(preg_replace('/[^A-Za-z0-9-]+/', '-', $this->title)));
     }
 
     public static function fromArray(array $data): FolderModel {
@@ -84,22 +72,6 @@ class FolderModel {
             $data['last_modified'] ?? '',
             $data['slug'] ?? ''
         );
-    }
-
-    public function toArray(): array {
-        return [
-            'id' => $this->id,
-            'title' => $this->title,
-            'description' => $this->description,
-            'text' => $this->text,
-            'user_id' => $this->user_id,
-            'type' => $this->type,
-            'language' => $this->language,
-            'isVisible' => $this->isVisible,
-            'created_at' => $this->created_at,
-            'last_modified' => $this->last_modified,
-            'slug' => $this->slug,
-        ];
     }
 }
 ?>
