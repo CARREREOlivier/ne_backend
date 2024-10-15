@@ -27,5 +27,16 @@ class FolderController {
             echo json_encode(['message' => 'Folder not found']);
         }
     }
+
+    public function getFolderBySlug(string $slug): void {
+        $folder = $this->folderRepository->findBySlug($slug);
+        if ($folder) {
+            echo json_encode($folder);
+        } else {
+            http_response_code(404);
+            echo json_encode(['message' => 'Folder not found']);
+        }
+    }
+
 }
 ?>

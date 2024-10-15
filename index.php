@@ -21,9 +21,29 @@ require_once __DIR__ . '/repositories/FolderRepository.php';
 
 // Routeur basique pour rediriger les requêtes
 switch (true) {
+    // Route pour récupérer tous les dossiers
     case preg_match('/\/folders\/?$/', $requestUri) && $requestMethod === 'GET':
         $folderController = new FolderController();  // Crée une instance de FolderController
         $folderController->getAllFolders();
+        break;
+
+    // Route pour accéder à un dossier par son slug
+    case preg_match('/\/aar\/([a-z0-9\-]+)\/?$/', $requestUri, $matches) && $requestMethod === 'GET':
+        $folderController = new FolderController();
+        $slug = $matches[1];
+        $folderController->getFolderBySlug($slug);  // Appel avec uniquement le slug
+        break;
+
+    case preg_match('/\/lets-play\/([a-z0-9\-]+)\/?$/', $requestUri, $matches) && $requestMethod === 'GET':
+        $folderController = new FolderController();
+        $slug = $matches[1];
+        $folderController->getFolderBySlug($slug);
+        break;
+
+    case preg_match('/\/fan-fiction\/([a-z0-9\-]+)\/?$/', $requestUri, $matches) && $requestMethod === 'GET':
+        $folderController = new FolderController();
+        $slug = $matches[1];
+        $folderController->getFolderBySlug($slug);
         break;
 
     default:

@@ -15,5 +15,10 @@ class FolderRepository {
     public function findById(int $id): ?array {
         return $this->folderDAO->findById($id);
     }
+
+    public function findBySlug(string $slug): ?array {
+        return $this->folderDAO->findBySlug($slug);
+    }
+
 }
 ?>
