@@ -1,36 +1,18 @@
 <?php
-// controllers/UserController.php
-
-require_once __DIR__ . '/../config/db.php';
 require_once __DIR__ . '/../repositories/UserRepository.php';
+require_once __DIR__ . '/../dao/UserDAO.php';
 
 class UserController {
-    private $repository;
+    private UserRepository $userRepository;
 
     public function __construct() {
-        $database = new Database();
-        $db = $database->getConnection();
-        $this->repository = new UserRepository($db);
+        // Passer l'instance de UserDAO au constructeur de UserRepository
+        $this->userRepository = new UserRepository(new UserDAO());
     }
 
-    public function getAllUsers() {
-        $users = $this->repository->getAllUsers();
+    public function getAllUsers(): void {
+        $users = $this->userRepository->findAll();
         echo json_encode($users);
-    }
-
-    public function getUserById($id) {
-        $user = $this->repository->getUserById($id);
-        echo json_encode($user);
-    }
-
-    public function createUser($username, $email, $password, $date_of_birth, $description) {
-        $result = $this->repository->createUser($username, $email, $password, $date_of_birth, $description);
-        if ($result) {
-            echo json_encode(array("message" => "User created successfully."));
-        } else {
-            echo json_encode(array("message" => "Failed to create user."));
-        }
     }
 }
 ?>
-<?php
