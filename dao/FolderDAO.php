@@ -1,12 +1,12 @@
 <?php
-
+require_once __DIR__ . '/../config/db.php';
 require_once __DIR__ . '/../utils/SlugGenerator.php';
 
 class FolderDAO {
     private PDO $conn;
 
     public function __construct() {
-        $this->conn = (new Database())->getConnection();
+        $this->conn = (new Database())->getConnection();  // Initialisation de la connexion à la base de données
     }
 
     public function createFolder(array $data): bool {
@@ -26,6 +26,38 @@ class FolderDAO {
         $stmt->bindParam(':slug', $slug);
         return $stmt->execute();
     }
-}
+    public function findAll(): array {
+        $query = "SELECT * FROM folders";
+        $stmt = $this->conn->prepare($query);
+        $stmt->execute();
+        return $stmt->fetchAll(PDO::FETCH_ASSOC);
+    }
 
+    public function findById(int $id): ?array {
+        $query = "SELECT * FROM folders WHERE id = :id";
+        $stmt = $this->conn->prepare($query);
+        $stmt->bindParam(':id', $id);
+        $stmt->execute();
+        $result = $stmt->fetch(PDO::FETCH_ASSOC);
+        return $result ?: null;
+    }
+
+    // Récupérer un dossier par son slug, incluant le type de dossier
+    public function findBySlug(string $slug): ?array {
+        $query = "SELECT folders.*, types.folder_type 
+                  FROM folders 
+                  JOIN types ON folders.type = types.id 
+                  WHERE folders.slug = :slug";
+        $stmt = $this->conn->prepare($query);
+        $stmt->bindParam(':slug', $slug);
+        $stmt->execute();
+        $result = $stmt->fetch(PDO::FETCH_ASSOC);
+        return $result ?: null;
+    }
+
+
+
+
+
+}
 ?>
