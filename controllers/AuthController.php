@@ -1,6 +1,6 @@
 <?php
-require_once '../repositories/UserRepository.php';
-require_once '../config/db.php';
+require_once __DIR__ . '/../repositories/UserRepository.php';
+require_once __DIR__ . '/../config/db.php';
 
 class AuthController {
     private $userRepository;

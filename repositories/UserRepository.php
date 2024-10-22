@@ -1,14 +1,17 @@
 <?php
 declare(strict_types=1);
 
+require_once __DIR__ . '/../config/db.php';
 require_once __DIR__ . '/../dao/UserDAO.php';
 require_once __DIR__ . '/../dto/UserDTO.php';
 
 class UserRepository {
     private UserDAO $userDAO;
+    private $conn;
 
-    public function __construct(UserDAO $userDAO) {
-        $this->userDAO = $userDAO;
+    public function __construct( $conn = null) {
+        //$this->userDAO = $userDAO;
+        $this->conn = (new Database())->getConnection();
     }
 
     public function findAll(): array {
@@ -22,8 +25,32 @@ class UserRepository {
     }
 
     public function findByEmail(string $email): ?UserDTO {
-        $user = $this->userDAO->findByEmail($email);
-        return $user ? UserDTO::fromArray($user) : null;
+        $query = "SELECT * FROM users WHERE email = :email LIMIT 1";
+        $stmt = $this->conn->prepare($query);
+        $stmt->bindParam(':email', $email);
+        $stmt->execute();
+
+        return $stmt->fetch(PDO::FETCH_ASSOC);
+    }
+    public function findByUsername($username) {
+        $query = "SELECT * FROM users WHERE username = :username LIMIT 1";
+        $stmt = $this->conn->prepare($query);
+        $stmt->bindParam(':username', $username);
+        $stmt->execute();
+
+        return $stmt->fetch(PDO::FETCH_ASSOC);
+    }
+
+    public function createUser($username, $email, $password, $role_id) {
+        $hashedPassword = password_hash($password, PASSWORD_DEFAULT);
+        $query = "INSERT INTO users (username, email, password, role_id) VALUES (:username, :email, :password, :role_id)";
+        $stmt = $this->conn->prepare($query);
+        $stmt->bindParam(':username', $username);
+        $stmt->bindParam(':email', $email);
+        $stmt->bindParam(':password', $hashedPassword);
+        $stmt->bindParam(':role_id', $role_id);
+
+        return $stmt->execute();
     }
 
     public function create(UserDTO $userDTO): bool {
