@@ -18,6 +18,12 @@ class FolderController {
         echo json_encode($folders);
     }
 
+    public function getFoldersByType($type): void
+    {
+        $folders = $this->folderRepository->findByType($type);
+        echo json_encode($folders);
+    }
+
     public function getFolderById(int $id): void {
         $folder = $this->folderRepository->findById($id);
         if ($folder) {

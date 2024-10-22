@@ -20,5 +20,18 @@ class FolderRepository {
         return $this->folderDAO->findBySlug($slug);
     }
 
+    public function findByType($type) {
+        $query = "SELECT folders.*, COUNT(articles.id) AS articleCount FROM folders 
+              LEFT JOIN articles ON folders.id = articles.folder_id 
+              WHERE folders.type = :type 
+              GROUP BY folders.id";
+        $stmt = $this->conn->prepare($query);
+        $stmt->bindParam(':type', $type);
+        $stmt->execute();
+
+        return $stmt->fetchAll(PDO::FETCH_ASSOC);
+    }
+
+
 }
 ?>
