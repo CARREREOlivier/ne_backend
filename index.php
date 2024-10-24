@@ -24,6 +24,7 @@ require_once __DIR__ . '/repositories/FolderRepository.php';
 
 //instancier ici les controlleurs.
 $authController = new AuthController();
+$folderController = new FolderController();
 
 // Routeur basique pour rediriger les requêtes
 switch (true) {
@@ -31,6 +32,19 @@ switch (true) {
     case preg_match('/\/folders\/?$/', $requestUri) && $requestMethod === 'GET':
         $folderController = new FolderController();  // Crée une instance de FolderController
         $folderController->getAllFolders();
+        break;
+
+// Routes pour récupérer les dossiers par type
+    case preg_match('/\/aar/', $requestUri) && $requestMethod === 'GET':
+        $folderController->getFoldersByType('AAR');  // Récupérer les dossiers de type AAR
+        break;
+
+    case preg_match('/\/lets-play/', $requestUri) && $requestMethod === 'GET':
+        $folderController->getFoldersByType('Let\'s Play');  // Récupérer les dossiers de type Let's Play
+        break;
+
+    case preg_match('/\/fan-fiction/', $requestUri) && $requestMethod === 'GET':
+        $folderController->getFoldersByType('Fan-Fiction');  // Récupérer les dossiers de type Fan-Fiction
         break;
 
     // Route pour accéder à un dossier par son slug

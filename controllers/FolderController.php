@@ -18,8 +18,7 @@ class FolderController {
         echo json_encode($folders);
     }
 
-    public function getFoldersByType($type): void
-    {
+    public function getFoldersByType($type) {
         $folders = $this->folderRepository->findByType($type);
         echo json_encode($folders);
     }
