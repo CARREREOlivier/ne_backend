@@ -22,6 +22,40 @@ class AarRepository {
 
         return $stmt->fetchAll(PDO::FETCH_ASSOC);
     }
+
+    public function findBySlugWithArticles($slug) {
+        $query = "
+        SELECT aars.id, aars.title, aars.description, aars.text, aars.slug, aars.isVisible, aars.created_at, aars.last_modified, 
+               users.username AS author_name, users.id AS author_id
+        FROM aars
+        JOIN users ON aars.user_id = users.id
+        WHERE aars.slug = :slug AND aars.isVisible = 1;
+    ";
+
+        $stmt = $this->conn->prepare($query);
+        $stmt->bindParam(':slug', $slug, PDO::PARAM_STR);
+        $stmt->execute();
+
+        $aar = $stmt->fetch(PDO::FETCH_ASSOC);
+
+        if ($aar) {
+            // Récupérer les articles associés à l'AAR
+            $queryArticles = "
+            SELECT articles.id, articles.title, articles.description, articles.created_at, articles.last_modified
+            FROM aars_articles AS articles
+            WHERE articles.aar_id = :aar_id AND articles.isVisible = 1
+            ORDER BY articles.created_at DESC;
+        ";
+
+            $stmtArticles = $this->conn->prepare($queryArticles);
+            $stmtArticles->bindParam(':aar_id', $aar['id'], PDO::PARAM_INT);
+            $stmtArticles->execute();
+
+            $aar['articles'] = $stmtArticles->fetchAll(PDO::FETCH_ASSOC);
+        }
+
+        return $aar ?: null;
+    }
     public function storeOneAar(string $title, string $description, string $text, int $userId, bool $isVisible, string $slug): bool {
         try {
             $query = "INSERT INTO aars (title, description, text, user_id, isVisible, slug, created_at, last_modified) 

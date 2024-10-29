@@ -75,6 +75,23 @@ class AarViewController {
         }
     }
 
+    public function getOneAar($slug) {
+        try {
+            // Récupérer les données de l'AAR via le repository
+            $aar = $this->aarRepository->findBySlugWithArticles($slug);
+
+            if ($aar) {
+                echo json_encode($aar);
+            } else {
+                http_response_code(404);
+                echo json_encode(['status' => 'error', 'message' => 'AAR non trouvé']);
+            }
+        } catch (Exception $e) {
+            http_response_code(500);
+            echo json_encode(['status' => 'error', 'message' => 'Erreur: ' . $e->getMessage()]);
+        }
+    }
+
     private function loadEnv() {
         if (file_exists(__DIR__ . '/../.env')) {
             $lines = file(__DIR__ . '/../.env');
