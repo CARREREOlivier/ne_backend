@@ -19,9 +19,12 @@ class UserRepository {
         return array_map(fn($user) => UserDTO::fromArray($user), $users);
     }
 
-    public function findById(int $id): ?UserDTO {
-        $user = $this->userDAO->findById($id);
-        return $user ? UserDTO::fromArray($user) : null;
+    public function findById($id) {
+        $query = "SELECT * FROM users WHERE id = :id";
+        $stmt = $this->conn->prepare($query);
+        $stmt->bindParam(':id', $id);
+        $stmt->execute();
+        return $stmt->fetch(PDO::FETCH_ASSOC);
     }
 
     public function findByEmail(string $email): ?UserDTO {

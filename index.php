@@ -1,6 +1,5 @@
 <?php
-
-
+session_start();
 header('Content-Type: application/json'); // Assurez-vous de toujours renvoyer du JSON
 header('Access-Control-Allow-Origin: http://localhost:4200');
 header('Access-Control-Allow-Methods: GET, POST, PUT, DELETE, OPTIONS');
@@ -18,70 +17,102 @@ $requestMethod = $_SERVER['REQUEST_METHOD'];
 
 // Inclure ici les fichiers de contrôleur nécessaires
 require_once __DIR__ . '/controllers/AuthController.php';
-require_once __DIR__ . '/controllers/FolderController.php';
-require_once __DIR__ . '/dao/FolderDAO.php';
-require_once __DIR__ . '/repositories/FolderRepository.php';
+require_once __DIR__ . '/controllers/userController.php';
+require_once __DIR__ . '/controllers/AarViewController.php';
+require_once __DIR__ . '/controllers/LetsPlayViewController.php';
+require_once __DIR__ . '/controllers/FanFictionViewController.php';
+require_once __DIR__ . '/repositories/UserRepository.php';
 
 //instancier ici les controlleurs.
-$authController = new AuthController();
-$folderController = new FolderController();
+
+$userController = new userController();
+
+//deboggage
+ini_set('display_errors', 1);
+ini_set('display_startup_errors', 1);
+error_reporting(E_ALL);
+
 
 // Routeur basique pour rediriger les requêtes
 switch (true) {
-    // Route pour récupérer tous les dossiers
-    case preg_match('/\/folders\/?$/', $requestUri) && $requestMethod === 'GET':
-        $folderController = new FolderController();  // Crée une instance de FolderController
-        $folderController->getAllFolders();
+
+    // Route pour récupérer un utilisateur par son ID
+    case preg_match('/\/users\/(\d+)/', $requestUri, $matches) && $requestMethod === 'GET':
+        $userId = $matches[1];
+        $userController = new UserController();
+        $userController->getUserById($userId);
         break;
 
+
 // Routes pour récupérer les dossiers par type
-    case preg_match('/\/aar/', $requestUri) && $requestMethod === 'GET':
-        $folderController->getFoldersByType('AAR');  // Récupérer les dossiers de type AAR
+    case preg_match('/\/aar\/?$/', $requestUri) && $requestMethod === 'GET':
+        $aarController = new AarViewController(); // Crée une instance pour le controleur de la vue aaar
+        $aarController->getAllAars();
         break;
 
     case preg_match('/\/lets-play/', $requestUri) && $requestMethod === 'GET':
-        $folderController->getFoldersByType('Let\'s Play');  // Récupérer les dossiers de type Let's Play
+        $letplayController = new LetsPlayViewController(); //crée une instance pour le controlleur de la vue let's play
+        $letplayController->getAllLetsPlays();
         break;
 
     case preg_match('/\/fan-fiction/', $requestUri) && $requestMethod === 'GET':
-        $folderController->getFoldersByType('Fan-Fiction');  // Récupérer les dossiers de type Fan-Fiction
+        $fanFictionController = new FanFictionViewController();
+        $fanFictionController->getAllFanFictions();
         break;
 
-    // Route pour accéder à un dossier par son slug
-    case preg_match('/\/aar\/([a-z0-9\-]+)\/?$/', $requestUri, $matches) && $requestMethod === 'GET':
-        $folderController = new FolderController();
+    //route pour créer un aar
+    case preg_match('/\/aar\/create\/?$/', $requestUri) && $requestMethod === 'POST':
+        $aarController = new AarViewController();
+        $aarController->createAar();
+        break;
+    // Route pour récupérer un dossier AAR par son slug
+    case preg_match('/\/aar\/([a-zA-Z0-9-_]+)/', $requestUri, $matches) && $requestMethod === 'GET':
         $slug = $matches[1];
-        $folderController->getFolderBySlug($slug);  // Appel avec uniquement le slug
+
         break;
 
-    case preg_match('/\/lets-play\/([a-z0-9\-]+)\/?$/', $requestUri, $matches) && $requestMethod === 'GET':
-        $folderController = new FolderController();
+    // Route pour récupérer un Let's Play par son slug
+    case preg_match('/\/lets-play\/([a-zA-Z0-9-_]+)/', $requestUri, $matches) && $requestMethod === 'GET':
         $slug = $matches[1];
-        $folderController->getFolderBySlug($slug);
 
         break;
 
-    case preg_match('/\/fan-fiction\/([a-z0-9\-]+)\/?$/', $requestUri, $matches) && $requestMethod === 'GET':
-        $folderController = new FolderController();
+    // Route pour récupérer une Fan Fiction par son slug
+    case preg_match('/\/fan-fiction\/([a-zA-Z0-9-_]+)/', $requestUri, $matches) && $requestMethod === 'GET':
         $slug = $matches[1];
-        $folderController->getFolderBySlug($slug);
+
         break;
+
 
     // Route pour Authentification
     case preg_match('/\/login/', $requestUri) && $requestMethod === 'POST':
+        $authController = new AuthController();
+
+        // Utilisation de php://input pour récupérer les données JSON envoyées par POST
         $data = json_decode(file_get_contents("php://input"), true);
+
+        // Vérifie que $data contient bien 'username' et 'password'
+        if (!isset($data['username']) || !isset($data['password'])) {
+            echo json_encode(['status' => 'error', 'message' => 'Champs requis manquants']);
+            exit;
+        }
+
         $username = $data['username'];
         $password = $data['password'];
         $rememberMe = $data['rememberMe'] ?? false;
+
+        // Appel au contrôleur pour gérer la connexion
         $response = $authController->login($username, $password, $rememberMe);
         echo json_encode($response);
         break;
 
     // Route pour déconnexion
     case preg_match('/\/logout/', $requestUri) && $requestMethod === 'POST':
+        $authController = new AuthController();
         $response = $authController->logout();
         echo json_encode($response);
         break;
+
 
     default:
         http_response_code(404);
