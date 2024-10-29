@@ -1,7 +1,7 @@
 <?php
-require_once __DIR__ . '../repositories/LetsPlayRepository.php';
-require_once __DIR__ . '../models/LetsPlayModel.php';
-require_once __DIR__ . '../config/db.php';
+require_once __DIR__ . '/../repositories/LetsPlayRepository.php';
+require_once __DIR__ . '/../models/LetsPlayModel.php';
+require_once __DIR__ . '/../config/db.php';
 
 class LetsPlayViewController {
     private $letsPlayRepository;
