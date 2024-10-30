@@ -57,8 +57,7 @@ class AarRepository
         if ($aar) {
             // Récupérer les articles associés à l'AAR
             $queryArticles = "
-            SELECT articles.id, articles.title, articles.description, articles.created_at, articles.last_modified
-            FROM aars_articles AS articles
+            SELECT articles.id, articles.title, articles.description, articles.created_at, articles.last_modified,articles.slug, articles.isVisible            FROM aars_articles AS articles
             WHERE articles.aar_id = :aar_id AND articles.isVisible = 1
             ORDER BY articles.created_at DESC;
         ";
