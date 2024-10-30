@@ -22,6 +22,7 @@ require_once __DIR__ . '/controllers/AarViewController.php';
 require_once __DIR__ . '/controllers/LetsPlayViewController.php';
 require_once __DIR__ . '/controllers/FanFictionViewController.php';
 require_once __DIR__ . '/repositories/UserRepository.php';
+require_once __DIR__ . '/controllers/AarArticleViewController.php';
 
 //instancier ici les controlleurs.
 
@@ -43,6 +44,12 @@ switch (true) {
         $userController->getUserById($userId);
         break;
 
+// Route pour afficher un article spécifique d'un AAR par slug
+    case preg_match('/\/aar\/article\/([^\/]+)/', $requestUri, $matches) && $requestMethod === 'GET':
+        $slug = $matches[1];
+        $controller = new AarArticleViewController();
+        $controller->getAarArticleBySlug($slug);
+        break;
 
 // Routes pour récupérer les dossiers par type
     case preg_match('/\/aar\/?$/', $requestUri) && $requestMethod === 'GET':
@@ -68,8 +75,16 @@ switch (true) {
     // Route pour récupérer un dossier AAR par son slug
     case preg_match('/\/aar\/([a-zA-Z0-9-_]+)/', $requestUri, $matches) && $requestMethod === 'GET':
         $slug = $matches[1];
-
+        $aarController = new AarViewController();
+        $aarController->getOneAar($slug);
         break;
+
+    case preg_match('/\/aar\/delete\/([a-zA-Z0-9-_]+)/', $requestUri, $matches) && $requestMethod === 'DELETE':
+        $slug = $matches[1];
+        $aarController = new AarViewController();
+        $aarController->deleteAar($slug);
+        break;
+
 
     // Route pour récupérer un Let's Play par son slug
     case preg_match('/\/lets-play\/([a-zA-Z0-9-_]+)/', $requestUri, $matches) && $requestMethod === 'GET':
@@ -112,6 +127,7 @@ switch (true) {
         $response = $authController->logout();
         echo json_encode($response);
         break;
+
 
 
     default:
