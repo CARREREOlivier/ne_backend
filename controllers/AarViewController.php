@@ -92,6 +92,21 @@ class AarViewController {
         }
     }
 
+    public function deleteAar($slug) {
+        try {
+            $aarRepository = new AarRepository($this->conn);
+            $result = $aarRepository->deleteAarBySlug($slug);
+
+            if ($result) {
+                echo json_encode(['status' => 'success', 'message' => 'AAR supprimé avec succès']);
+            } else {
+                echo json_encode(['status' => 'error', 'message' => 'Erreur lors de la suppression de l\'AAR']);
+            }
+        } catch (Exception $e) {
+            echo json_encode(['status' => 'error', 'message' => 'Erreur lors de la suppression : ' . $e->getMessage()]);
+        }
+    }
+
     private function loadEnv() {
         if (file_exists(__DIR__ . '/../.env')) {
             $lines = file(__DIR__ . '/../.env');

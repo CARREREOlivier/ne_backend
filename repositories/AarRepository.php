@@ -1,14 +1,18 @@
 <?php
-require_once __DIR__ .'/../Utils/SlugGenerator.php';
-class AarRepository {
+require_once __DIR__ . '/../Utils/SlugGenerator.php';
+
+class AarRepository
+{
     private $conn;
 
-    public function __construct($conn) {
+    public function __construct($conn)
+    {
         $this->conn = $conn;
     }
 
     // Méthode pour récupérer tous les AAR et le nombre d'articles associés
-    public function findAllAars() {
+    public function findAllAars()
+    {
         $query = "
             SELECT aars.*, users.username, COUNT(aars_articles.id) AS article_count 
             FROM aars 
@@ -23,7 +27,19 @@ class AarRepository {
         return $stmt->fetchAll(PDO::FETCH_ASSOC);
     }
 
-    public function findBySlugWithArticles($slug) {
+    public function findBySlug($slug)
+    {
+        $query = "SELECT aars.* FROM aars  WHERE aars.slug = :slug;";
+
+        $stmt = $this->conn->prepare($query);
+        $stmt->bindParam(':slug', $slug, PDO::PARAM_STR);
+        $stmt->execute();
+
+        return $stmt->fetch(PDO::FETCH_ASSOC);
+    }
+
+    public function findBySlugWithArticles($slug)
+    {
         $query = "
         SELECT aars.id, aars.title, aars.description, aars.text, aars.slug, aars.isVisible, aars.created_at, aars.last_modified, 
                users.username AS author_name, users.id AS author_id
@@ -56,7 +72,9 @@ class AarRepository {
 
         return $aar ?: null;
     }
-    public function storeOneAar(string $title, string $description, string $text, int $userId, bool $isVisible, string $slug): bool {
+
+    public function storeOneAar(string $title, string $description, string $text, int $userId, bool $isVisible, string $slug): bool
+    {
         try {
             $query = "INSERT INTO aars (title, description, text, user_id, isVisible, slug, created_at, last_modified) 
                   VALUES (:title, :description, :text, :user_id, :isVisible, :slug, NOW(), NOW())";
@@ -74,4 +92,43 @@ class AarRepository {
             throw new Exception("Erreur lors de l'insertion de l'AAR : " . $e->getMessage());
         }
     }
+
+    public function deleteAarBySlug($slug) {
+        try {
+            // Commence une transaction
+            $this->conn->beginTransaction();
+
+            //récupère l'id de l'aar
+            $aar = $this->findBySlug($slug);
+            $aar_id = $aar['id'];
+
+            // Supprime les commentaires associés
+            $queryComments = "DELETE FROM aars_commentaries WHERE aar_id = :aarId";
+            $stmtComments = $this->conn->prepare($queryComments);
+            $stmtComments->bindParam(":aarId", $aar_id, PDO::PARAM_INT);
+            $stmtComments->execute();
+
+            // Supprime les articles associés
+            $queryArticles = "DELETE FROM aars_articles WHERE aars_articles.aar_id = :aarId";
+            $stmtArticles = $this->conn->prepare($queryArticles);
+            $stmtArticles->bindParam("aarId",$aar_id, PDO::PARAM_INT);
+            $stmtArticles->execute();
+
+            // Supprime l'AAR
+            $queryAar = "DELETE FROM aars WHERE id = :aarId";
+            $stmtAar = $this->conn->prepare($queryAar);
+            $stmtAar->bindParam("aarId",$aar_id, PDO::PARAM_INT);
+            $stmtAar->execute();
+
+            // Valide la transaction
+            $this->conn->commit();
+
+            return true;
+        } catch (Exception $e) {
+            // Annule la transaction en cas d'erreur
+            $this->conn->rollBack();
+            throw new Exception("Erreur lors de la suppression : " . $e->getMessage());
+        }
+    }
+
 }
