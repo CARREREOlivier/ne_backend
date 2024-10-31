@@ -1,8 +1,16 @@
 <?php
-require_once __DIR__ . '/../repositories/AarRepository.php';
+namespace AarViewController ;
+
 require_once __DIR__ . '/../models/AarModel.php';
 require_once __DIR__ . '/../config/db.php';
-require_once __DIR__ . '/../Utils/SlugGenerator.php';
+
+use AarRepository;
+use Database;
+use Exception;
+use PDO;
+use PDOException;
+use SlugGenerator;
+
 
 class AarViewController {
     private $aarRepository;

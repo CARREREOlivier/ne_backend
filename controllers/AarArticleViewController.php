@@ -1,9 +1,14 @@
 <?php
-require_once __DIR__ . '/../config/db.php';
-require_once __DIR__ . '/../Utils/SlugGenerator.php';
-require_once __DIR__ . '/../repositories/AarArticleRepository.php';
-require_once __DIR__ . '/../Utils/EnvLoader.php';
+namespace AarArticleViewController ;
 
+require_once __DIR__ . '/../config/db.php';
+
+use AarArticleRepository;
+use AllowDynamicProperties;
+use Database;
+use Exception;
+use PDO;
+use PDOException;
 use Utils\EnvLoader;
 #[AllowDynamicProperties] class AarArticleViewController
 {
